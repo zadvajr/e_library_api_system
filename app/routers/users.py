@@ -36,3 +36,19 @@ async def update_user(user_id: int, user_in: UsersCreate):
     raise HTTPException(status_code=404, detail="User not found!")
 
 @user_router.patch("/{user_id}")
+async def patch_user(user_id: int, user_in: UsersCreate):
+    """patches a user"""
+    for user in users:
+        if user["id"] == user_id:
+            user.update(user_in.model_dump())
+            return user
+    raise HTTPException(status_code=404, detail="User not found!")
+
+@user_router.delete("/{user_id}")
+async def delete_user(user_id: int):
+    """deletes a user"""
+    for user in users:
+        if user["id"] == user_id:
+            users.remove(user)
+            return {"message": "User deleted successfully!"}
+    raise HTTPException(status_code=404, detail="User not found!")
