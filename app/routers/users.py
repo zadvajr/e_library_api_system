@@ -5,12 +5,12 @@ from models.users import Users, UsersCreate
 
 user_router = APIRouter()
 
-@user_router.get("/")
+@user_router.get("/", response_model=list[Users], status_code=200)
 async def read_users():
     """returns all users from the schema"""
     return users
 
-@user_router.get("/{user_id}")
+@user_router.get("/{user_id}", response_model=Users, status_code=200)
 async def read_user(user_id: int):
     """returns a single user from the schema"""
     for user in users:
@@ -18,7 +18,7 @@ async def read_user(user_id: int):
             return user
     raise HTTPException(status_code=404, detail="User not found!")
 
-@user_router.post("/", response_model=Users)
+@user_router.post("/", response_model=Users, status_code=201)
 async def create_user(user: UsersCreate):
     """creates a new user"""
     user_id = len(users) + 1
@@ -26,7 +26,7 @@ async def create_user(user: UsersCreate):
     users.append(user.model_dump())
     return user
 
-@user_router.put("/{user_id}", response_model=Users)
+@user_router.put("/{user_id}", response_model=Users, status_code=200)
 async def update_user(user_id: int, user_in: UsersCreate):
     """updates a user"""
     for user in users:
@@ -35,7 +35,7 @@ async def update_user(user_id: int, user_in: UsersCreate):
             return user
     raise HTTPException(status_code=404, detail="User not found!")
 
-@user_router.patch("/{user_id}")
+@user_router.patch("/{user_id}", response_model=Users, status_code=200)
 async def patch_user(user_id: int, user_in: UsersCreate):
     """patches a user"""
     for user in users:
@@ -44,7 +44,7 @@ async def patch_user(user_id: int, user_in: UsersCreate):
             return user
     raise HTTPException(status_code=404, detail="User not found!")
 
-@user_router.delete("/{user_id}")
+@user_router.delete("/{user_id}", response_model=dict, status_code=200)
 async def delete_user(user_id: int):
     """deletes a user"""
     for user in users:

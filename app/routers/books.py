@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from schemas.books import books
-from models.books import Book
+from models.books import Book, BookCreate
 
 book_router = APIRouter()
 
@@ -17,16 +17,16 @@ async def read_book(book_id: int):
             return book
     raise HTTPException(status_code=404, detail="Book not found!")
 
-@book_router.post("/", response_model=Books)
-async def create_book(book: BooksCreate):
+@book_router.post("/", response_model=Book)
+async def create_book(book: BookCreate):
     """creates a new book"""
     book_id = len(books) + 1
-    book = Books(**book.model_dump(), id=book_id)
+    book = Book(**book.model_dump(), id=book_id)
     books.append(book.model_dump())
     return book
 
-@book_router.put("/{book_id}", response_model=Books)
-async def update_book(book_id: int, book_in: BooksCreate):
+@book_router.put("/{book_id}", response_model=Book)
+async def update_book(book_id: int, book_in: BookCreate):
     """updates a book"""
     for book in books:
         if book["id"] == book_id:
@@ -35,7 +35,7 @@ async def update_book(book_id: int, book_in: BooksCreate):
     raise HTTPException(status_code=404, detail="Book not found!")
 
 @book_router.patch("/{book_id}")
-async def patch_book(book_id: int, book_in: BooksCreate):
+async def patch_book(book_id: int, book_in: BookCreate):
     """patches a book"""
     for book in books:
         if book["id"] == book_id:
