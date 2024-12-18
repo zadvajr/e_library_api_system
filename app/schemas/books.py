@@ -1,3 +1,3 @@
-#books model
+"""books database"""
 
 books = []

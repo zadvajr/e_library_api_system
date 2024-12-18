@@ -1,53 +1,62 @@
 """imported modules"""
 from fastapi import APIRouter, HTTPException
 from schemas.users import users
-from models.users import Users, UsersCreate
+from models.users import (User, UserCreate, UserUpdate)
 
 user_router = APIRouter()
 
-@user_router.get("/", response_model=list[Users], status_code=200)
+@user_router.get("", response_model=list[User], status_code=200)
 async def read_users():
     """returns all users from the schema"""
     return users
 
-@user_router.get("/{user_id}", response_model=Users, status_code=200)
+@user_router.get("/{user_id}", response_model=User, status_code=200)
 async def read_user(user_id: int):
     """returns a single user from the schema"""
-    for user in users:
+    for user in users.copy():
         if user["id"] == user_id:
             return user
     raise HTTPException(status_code=404, detail="User not found!")
 
-@user_router.post("/", response_model=Users, status_code=201)
-async def create_user(user: UsersCreate):
+@user_router.post("", response_model=User, status_code=201)
+async def create_user(user: UserCreate):
     """creates a new user"""
     user_id = len(users) + 1
-    user = Users(**user.model_dump(), id=user_id)
+    user = User(**user.model_dump(), id=user_id)
     users.append(user.model_dump())
     return user
 
-@user_router.put("/{user_id}", response_model=Users, status_code=200)
-async def update_user(user_id: int, user_in: UsersCreate):
+@user_router.put("/{user_id}", response_model=User, status_code=200)
+async def update_user(user_id: int, user_in: UserUpdate):
     """updates a user"""
-    for user in users:
+    for user in users.copy():
         if user["id"] == user_id:
             user.update(user_in.model_dump())
             return user
     raise HTTPException(status_code=404, detail="User not found!")
 
-@user_router.patch("/{user_id}", response_model=Users, status_code=200)
-async def patch_user(user_id: int, user_in: UsersCreate):
+@user_router.patch("/{user_id}", response_model=User, status_code=200)
+async def patch_user(user_id: int, user_in: UserUpdate):
     """patches a user"""
-    for user in users:
+    for user in users.copy():
         if user["id"] == user_id:
             user.update(user_in.model_dump())
+            return user
+    raise HTTPException(status_code=404, detail="User not found!")
+
+@user_router.put("/{user_id}", response_model=User, status_code=200)
+async def deactivate_user(user_id: int, status: bool):
+    """Endpoint to deactivate a user, setting is_active to False"""
+    for user in users.copy():
+        if user["id"] == user_id:
+            user["is_active"] = status
             return user
     raise HTTPException(status_code=404, detail="User not found!")
 
 @user_router.delete("/{user_id}", response_model=dict, status_code=200)
 async def delete_user(user_id: int):
     """deletes a user"""
-    for user in users:
+    for user in users.copy():
         if user["id"] == user_id:
             users.remove(user)
             return {"message": "User deleted successfully!"}
