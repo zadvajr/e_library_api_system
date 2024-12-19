@@ -37,20 +37,23 @@ async def update_user(user_id: int, user_in: UserUpdate):
 
 @user_router.patch("/{user_id}", response_model=User, status_code=200)
 async def patch_user(user_id: int, user_in: UserUpdate):
-    """patches a user"""
+    """partially updates a user"""
     for user in users.copy():
         if user["id"] == user_id:
-            user.update(user_in.model_dump())
-            return user
+            updated_user = user.copy()
+            updated_user.update(user_in.model_dump(exclude_unset=True))
+            user.update(updated_user)
+            return updated_user
     raise HTTPException(status_code=404, detail="User not found!")
 
-@user_router.put("/{user_id}", response_model=User, status_code=200)
-async def deactivate_user(user_id: int, status: bool):
+@user_router.patch("/{user_id}/deactivate", response_model=User, status_code=200)
+async def deactivate_user(user_id: int):
     """Endpoint to deactivate a user, setting is_active to False"""
-    for user in users.copy():
+    for i, user in enumerate(users):
         if user["id"] == user_id:
-            user["is_active"] = status
-            return user
+            users[i]["is_active"] = False
+            return User(**users[i])
+            # return {"message": "User deactivated successfully!"}
     raise HTTPException(status_code=404, detail="User not found!")
 
 @user_router.delete("/{user_id}", response_model=dict, status_code=200)
