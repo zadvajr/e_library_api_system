@@ -1,4 +1,5 @@
 """This module contains the Borrow router."""
+from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from schemas.borrows import borrows
 from schemas.books import books
@@ -51,6 +52,22 @@ async def partial_update_borrow(borrow_id: int, borrow_in: BorrowUpdate):
     for borrow in borrows.copy():
         if borrow["id"] == borrow_id:
             borrow.update(borrow_in.model_dump())
+            return borrow
+    raise HTTPException(status_code=404, detail="Borrow not found!")
+
+@borrow_router.patch("/{borrow_id}/return", response_model=BorrowUpdate, status_code=200)
+async def return_borrowed_book(borrow_id: int):
+    """returns a borrowed book"""
+    for borrow in borrows.copy():
+        if borrow["id"] == borrow_id:
+            borrow["is_returned"] = True
+            borrow["returned_at"] = datetime.now()
+            borrow["returned"] = True
+            book_id = borrow["book_id"]
+            for book in books:
+                if book["id"] == book_id:
+                    book["is_available"] = True
+                    break
             return borrow
     raise HTTPException(status_code=404, detail="Borrow not found!")
 

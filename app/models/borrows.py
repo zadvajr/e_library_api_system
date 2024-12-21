@@ -20,6 +20,8 @@ class BorrowUpdate(BorrowBase):
     """Borrow update model."""
     borrow_date: str = None
     return_date: str = None
+    returned: bool = None
+    
 
 class ReturnBorrow(BorrowBase):
     """Return borrow model."""
